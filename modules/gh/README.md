@@ -1,213 +1,285 @@
-# gh
+# `gh branch` – GitHub Branch Commands (Nushell)
 
-## gh branch
+Manage GitHub branches via the GitHub CLI (`gh`) from within Nushell.
 
-### `get`
-Get a GitHub branch.
+---
 
-**Usage**:
+## Subcommands
+
+### 🔹 `get` — Get a GitHub Branch
+
+Retrieves information about a specific GitHub branch.
+
+**Usage:**
+
 ```nu
-get {flags} <branch>
+gh branch get --repo=<string> --args=<list<string>> <branch>
 ```
 
-**Flags**:
-- `--repo <string>`: Repository name (format: `owner/repo`)
-- `--args <list<string>>`: Additional arguments (default: `[]`)
-- `-h, --help`: Display help message
+**Parameters:**
 
-**Parameters**:
-- `branch <string>`: Branch name to retrieve
+* `branch` (string) – The name of the branch to retrieve.
 
-**Input/Output**:
-| Input | Output |
-|-------|--------|
-| any   | any    |
+**Flags:**
 
-**Example**:
-```nu
-get main --repo octocat/Hello-World
+* `--repo=<string>` – The GitHub repository in the format `owner/name`.
+* `--args=<list<string>>` – Additional arguments to pass to the `gh` command. *(default: `[]`)*
+* `-h`, `--help` – Display help for this command.
+
+**Input/output types:**
+
+```
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
 ```
 
 ---
 
-### `list`
-List GitHub branches.
+### 🔹 `list` — List GitHub Branches
 
-**Usage**:
+Lists all branches in the specified GitHub repository.
+
+**Usage:**
+
 ```nu
-list {flags}
+gh branch list --repo=<string> --args=<list<string>>
 ```
 
-**Flags**:
-- `--repo <string>`: Repository name (format: `owner/repo`)
-- `--args <list<string>>`: Additional arguments (default: `[]`)
-- `-h, --help`: Display help message
+**Flags:**
 
-**Input/Output**:
-| Input | Output |
-|-------|--------|
-| any   | any    |
+* `--repo=<string>` – The GitHub repository in the format `owner/name`.
+* `--args=<list<string>>` – Additional arguments to pass to the `gh` command. *(default: `[]`)*
+* `-h`, `--help` – Display help for this command.
 
-**Example**:
-```nu
-list --repo octocat/Hello-World
+**Input/output types:**
+
 ```
-
-## Notes
-- Both commands require repository specification via `--repo` flag
-- The `--args` parameter accepts a list of strings for additional API parameters
-- Output format depends on GitHub API response
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
 ```
-
-## gh workflow
-
-### `list`
-List GitHub workflows.
-
-**Usage**:
-```nu
-list {flags}
-```
-
-**Flags**:
-- `--repo <string>`: Repository name
-- `--args <list<string>>` (default: `[]`)
-- `-h, --help`: Display help message
-
-**Input/Output**:
-| Input | Output |
-|-------|--------|
-| any   | any    |
 
 ---
 
-### `run`
-Run a workflow (create the workflow_dispatch event).
+# `gh workflow` – GitHub Workflow Commands (Nushell)
 
-**Usage**:
-```nu
-run {flags} <workflow>
-```
-
-**Subcommands**:
-- `run get` - Get workflow run by id
-- `run get-dispatched` - Run a workflow and wait for dispatch
-- `run list` - List workflow runs
-- `run wait` - Wait for a workflow run
-
-**Flags**:
-- `--repo <string>`: Repository (e.g., `dennybaa/foobar`)
-- `--ref <string>`: Branch/tag (default: `main`)
-- `--inputs <record>`: Workflow input parameters
-- `--args <list<any>>` (default: `[]`)
-- `-h, --help`: Display help message
-
-**Parameters**:
-- `workflow <string>`: Workflow name or filename
-
-**Input/Output**:
-| Input | Output |
-|-------|--------|
-| any   | any    |
+Manage GitHub Actions workflows via the GitHub CLI (`gh`) from Nushell.
 
 ---
 
-### `run get`
-Get workflow run by id.
+## Subcommands
 
-**Usage**:
+### 🔹 `list` — List GitHub Workflows
+
+Returns the list of workflows in the specified repository.
+
+**Usage:**
+
 ```nu
-run get {flags} <run_id>
+gh workflow list --repo=<string> --args=<list<string>>
 ```
 
-**Flags**:
-- `--repo <string>`: Repository
-- `-h, --help`: Display help message
+**Flags:**
 
-**Parameters**:
-- `run_id <int>`: Workflow run ID
+* `--repo=<string>` – The GitHub repository.
+* `--args=<list<string>>` – Additional arguments to pass to the `gh` command. *(default: `[]`)*
+* `-h`, `--help` – Display help for this command.
 
-**Input/Output**:
-| Input | Output |
-|-------|--------|
-| any   | any    |
+**Input/output types:**
+
+```
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
+```
 
 ---
 
-### `run get-dispatched`
-Run a workflow and wait for dispatch.
+### 🔹 `run` — Run a Workflow
 
-**Usage**:
+Dispatches a workflow using the `workflow_dispatch` event.
+
+**Usage:**
+
 ```nu
-run get-dispatched {flags} <workflow>
+gh workflow run --repo=<string> --ref=<string> --inputs=<record> --args=<list<any>> <workflow>
 ```
 
-**Flags**:
-- `--interval <duration>`: Poll interval (default: `5sec`)
-- `--timeout <duration>`: Timeout (default: `15sec`)
-- `--repo <string>`: Repository
-- `--ref <string>`: Branch/tag (default: `main`)
-- `--inputs <record>`: Workflow inputs
-- `--args <list<any>>` (default: `[]`)
-- `-h, --help`: Display help message
+**Parameters:**
 
-**Parameters**:
-- `workflow <string>`: Workflow name or filename
+* `workflow` (string) – Workflow name or filename to run.
 
-**Input/Output**:
-| Input | Output |
-|-------|--------|
-| any   | any    |
+**Flags:**
+
+* `--repo=<string>` – The GitHub repository.
+* `--ref=<string>` – Git ref/branch. *(default: `'main'`)*
+* `--inputs=<record>` – Input parameters for the workflow.
+* `--args=<list<any>>` – Additional CLI arguments. *(default: `[]`)*
+* `-h`, `--help` – Display help for this command.
+
+**Returns:**
+
+* `{ workflow: record, error?: record }`
+
+**Input/output types:**
+
+```
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
+```
 
 ---
 
-### `run list`
-List workflow runs.
+### 🔹 `run get` — Get Workflow Run by ID
 
-**Usage**:
+Fetches a workflow run by its ID.
+
+**Usage:**
+
 ```nu
-run list {flags} <workflow>
+gh workflow run get --repo=<string> <run_id>
 ```
 
-**Flags**:
-- `--repo <string>`: Repository
-- `--filter <record>`: Filter parameters (default: `{}`)
-- `--args <list<string>>` (default: `[]`)
-- `-h, --help`: Display help message
+**Parameters:**
 
-**Parameters**:
-- `workflow <any>`: Workflow ID or filename
+* `run_id` (int) – The workflow run ID.
 
-**Input/Output**:
-| Input | Output |
-|-------|--------|
-| any   | any    |
+**Flags:**
+
+* `--repo=<string>` – The GitHub repository.
+* `-h`, `--help` – Display help for this command.
+
+**Input/output types:**
+
+```
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
+```
 
 ---
 
-### `run wait`
-Wait for a workflow run to complete.
+### 🔹 `run get-dispatched` — Run and Wait for Dispatch
 
-**Usage**:
+Runs a workflow and waits until it is registered on the current SHA.
+
+**Usage:**
+
 ```nu
-run wait {flags} <run_id>
+gh workflow run get-dispatched --repo=<string> --ref=<string> --inputs=<record> --interval=<duration> --timeout=<duration> --args=<list<any>> <workflow>
 ```
 
-**Flags**:
-- `--repo <string>`: Repository
-- `--interval <duration>`: Poll interval (default: `5sec`)
-- `--timeout <duration>`: Timeout (default: `1min`)
-- `--status <list<string>>`: Wait for specific status (default: `['completed']`)
-- `-h, --help`: Display help message
+**Parameters:**
 
-**Parameters**:
-- `run_id <int>`: Workflow run ID
+* `workflow` (string) – Workflow name or filename.
 
-**Status Values**:
-`completed`, `action_required`, `cancelled`, `failure`, `neutral`, `skipped`, `stale`, `success`, `timed_out`, `in_progress`, `queued`, `requested`, `waiting`, `pending`
+**Flags:**
 
-**Input/Output**:
-| Input | Output |
-|-------|--------|
-| any   | any    |
+* `--repo=<string>` – The GitHub repository.
+* `--ref=<string>` – Git ref/branch. *(default: `'main'`)*
+* `--inputs=<record>` – Input parameters.
+* `--interval=<duration>` – Polling interval. *(default: `5sec`)*
+* `--timeout=<duration>` – Timeout duration. *(default: `15sec`)*
+* `--args=<list<any>>` – Additional CLI arguments. *(default: `[]`)*
+* `-h`, `--help` – Display help for this command.
+
+**Returns:**
+
+* `{ run: record, error?: record }`
+
+**Input/output types:**
+
+```
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
+```
+
+---
+
+### 🔹 `run list` — List Workflow Runs
+
+Returns the list of runs for a given workflow.
+
+**Usage:**
+
+```nu
+gh workflow run list --repo=<string> --filter=<record> --args=<list<string>> <workflow>
+```
+
+**Parameters:**
+
+* `workflow` (any) – Workflow ID or filename.
+
+**Flags:**
+
+* `--repo=<string>` – The GitHub repository.
+* `--filter=<record>` – Optional filters (e.g., `status`, `branch`). *(default: `{}`)*
+* `--args=<list<string>>` – Additional CLI arguments. *(default: `[]`)*
+* `-h`, `--help` – Display help for this command.
+
+**Input/output types:**
+
+```
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
+```
+
+---
+
+### 🔹 `run wait` — Wait for Workflow Run Completion
+
+Waits until the given workflow run reaches a specific status.
+
+**Usage:**
+
+```nu
+gh workflow run wait --repo=<string> --interval=<duration> --timeout=<duration> --status=<list<string>> <run_id>
+```
+
+**Parameters:**
+
+* `run_id` (int) – The workflow run ID.
+
+**Flags:**
+
+* `--repo=<string>` – The GitHub repository.
+* `--interval=<duration>` – Polling interval. *(default: `5sec`)*
+* `--timeout=<duration>` – Wait timeout. *(default: `1min`)*
+* `--status=<list<string>>` – Desired statuses to wait for. *(default: `['completed']`)*
+* `-h`, `--help` – Display help for this command.
+
+**Valid statuses:**
+
+```
+completed, action_required, cancelled, failure, neutral, skipped,
+stale, success, timed_out, in_progress, queued, requested,
+waiting, pending
+```
+
+**Input/output types:**
+
+```
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
 ```

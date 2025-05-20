@@ -66,6 +66,81 @@ gh branch list --repo=<string> --args=<list<string>>
 
 ---
 
+# `gh pr` – GitHub PullRequest Commands (Nushell)
+
+Manage GitHub Actions pull requests via the GitHub CLI (`gh`) from Nushell.
+
+## Subcommands
+
+### 🔹 `get` — Get a GitHub Pull Request by Number
+
+Returns the pull request matching the specified number.
+
+**Usage:**
+
+```nu
+gh pr get --repo=<string> --args=<list<string>> <pull_number>
+```
+
+**Parameters:**
+
+* `pull_number` (int) – The pull request number to retrieve.
+
+**Flags:**
+
+* `--repo=<string>` – The GitHub repository.
+* `--args=<list<string>>` – Additional CLI arguments. *(default: `[]`)*
+* `-h`, `--help` – Display help for this command.
+
+**Input/output types:**
+
+```
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
+```
+
+---
+
+### 🔹 `list` — List GitHub Pull Requests
+
+Lists pull requests in the repository. Supports filtering by `state`, `head`, `base`, etc.
+
+**Usage:**
+
+```nu
+gh pr list --repo=<string> --filter=<record> --args=<list<string>>
+```
+
+**Flags:**
+
+* `--repo=<string>` – The GitHub repository.
+* `--filter=<record>` – Optional filters (e.g., `state`, `head`, `base`). *(default: `{}`)*
+* `--args=<list<string>>` – Additional CLI arguments. *(default: `[]`)*
+* `-h`, `--help` – Display help for this command.
+
+**Useful filters:**
+
+* `state` – `open`, `closed`, `all`. *(default: `open`)*
+* `head` – Filter by source branch (`org:branch` format).
+* `base` – Filter by target branch.
+
+> See full filter options in the [GitHub API reference](https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests--parameters).
+
+**Input/output types:**
+
+```
+╭───┬───────┬────────╮
+│ # │ input │ output │
+├───┼───────┼────────┤
+│ 0 │ any   │ any    │
+╰───┴───────┴────────╯
+```
+
+---
+
 # `gh workflow` – GitHub Workflow Commands (Nushell)
 
 Manage GitHub Actions workflows via the GitHub CLI (`gh`) from Nushell.

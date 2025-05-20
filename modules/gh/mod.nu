@@ -5,6 +5,7 @@ export-env {
 }
 
 export module ./branch.nu
+export module ./pr.nu
 export module ./workflow.nu
 
 

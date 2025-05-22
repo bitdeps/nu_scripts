@@ -1,9 +1,8 @@
 use std/log
-
 const command_base = 'gh core'
 
 def is_ci [] {
-    $env.CI? == 'true'
+    ($env.CI? | default "false") == "true"
 }
 
 # Github action core debug command
@@ -11,7 +10,7 @@ def is_ci [] {
 export def --env "debug" [
     message: string     # A message
 ] {
-    if not is_ci { return }
+    if not (is_ci) { return }
     print $"::debug::($message)"
 }
 
@@ -21,7 +20,7 @@ export def --env "notice" [
     message: string     # A message
     --params: record    # Record with parameters (file, line, endLine and title)
 ] {
-    if not is_ci { return }
+    if not (is_ci) { return }
     mut sparams = ""
     if ($params | is-not-empty) {
         $params | transpose key value | each {|e| $"($e.key)=($e.value)"} | str join ','

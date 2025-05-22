@@ -4,6 +4,7 @@ export-env {
     use std/log
 }
 
+export module ./core.nu
 export module ./branch.nu
 export module ./pr.nu
 export module ./workflow.nu

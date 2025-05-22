@@ -20,8 +20,8 @@ def --env setup-lib-dirs [] {
       | filter {|p| ($p | path exists) }
   )
   $env.NU_LIB_DIRS = ($env.NU_LIB_DIRS | append $dirs)
-#   print 'Current NU_LIB_DIRS: '
-#   print $env.NU_LIB_DIRS
+  print 'Current NU_LIB_DIRS: '
+  print $env.NU_LIB_DIRS
 #   # open $nu.env-path
 #   #   | str replace -s '$env.NU_LIB_DIRS = [' $'$env.NU_LIB_DIRS = [(char nl)($env.NU_LIB_DIRS | str join (char nl))'
 #   #   | save -f $nu.env-path

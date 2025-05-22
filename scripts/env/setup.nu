@@ -10,9 +10,7 @@ export def 'get-env' [
 }
 
 
-def-env setup-lib-dirs [] {
-#   print 'Current working dir: '
-#   print ($env.PWD)
+def --env setup-lib-dirs [] {
   let module_dirs = ($env | get -i $LIB_ENV | default '' | str trim)
   if ($module_dirs | is-empty) { return }
   let dirs = (
@@ -24,9 +22,9 @@ def-env setup-lib-dirs [] {
   $env.NU_LIB_DIRS = ($env.NU_LIB_DIRS | append $dirs)
 #   print 'Current NU_LIB_DIRS: '
 #   print $env.NU_LIB_DIRS
-  # open $nu.env-path
-  #   | str replace -s '$env.NU_LIB_DIRS = [' $'$env.NU_LIB_DIRS = [(char nl)($env.NU_LIB_DIRS | str join (char nl))'
-  #   | save -f $nu.env-path
+#   # open $nu.env-path
+#   #   | str replace -s '$env.NU_LIB_DIRS = [' $'$env.NU_LIB_DIRS = [(char nl)($env.NU_LIB_DIRS | str join (char nl))'
+#   #   | save -f $nu.env-path
 }
 
 setup-lib-dirs

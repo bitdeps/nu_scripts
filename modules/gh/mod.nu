@@ -1,6 +1,7 @@
 use std/log
 
 export-env {
+    $env.NU_LOG_LEVEL = $env.NU_LOG_LEVEL? | default "error"
     use std/log
 }
 

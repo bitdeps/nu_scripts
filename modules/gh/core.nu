@@ -75,7 +75,7 @@ export def getInput [
 ] {
     if not (is_ci) { return }
     let input = $name | str replace -a -r ' ' '_' | str upcase | $'INPUT_($in)'
-    $env | get $input
+    $env | get -i -s $input
 }
 
 # Github action core setOutput

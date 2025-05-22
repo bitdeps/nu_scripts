@@ -8,7 +8,7 @@ def is_ci [] {
 
 # Github action core debug command
 #
-export def --env "core debug" [
+export def --env "debug" [
     message: string     # A message
 ] {
     if not is_ci { return }
@@ -17,7 +17,7 @@ export def --env "core debug" [
 
 # Github action core notice command
 #
-export def --env "core notice" [
+export def --env "notice" [
     message: string     # A message
     --params: record    # Record with parameters (file, line, endLine and title)
 ] {

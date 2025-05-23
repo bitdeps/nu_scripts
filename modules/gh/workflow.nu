@@ -113,7 +113,7 @@ export def --env "run get-dispatched" [
             ...$extra
         }
         | if ($in.error? | is-not-empty) { return $in } else {
-            $in.workflow_runs?.0 | default {}    
+            $in.workflow_runs.0? | default {}    
         }
     }
 

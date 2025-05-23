@@ -2,7 +2,7 @@
 const LIB_ENV = 'NU_MODULE_DIRS'
 
 # Get the specified env key's value or ''
-export def 'get-env' [
+def 'get-env' [
     key: string       # The key to get it's env value
     default?: string  # The default value for an empty env
 ] {
@@ -10,7 +10,7 @@ export def 'get-env' [
 }
 
 # Split NU_MODULE_DIRS (; separated) helper variable 
-export def nu-module-dirs [] {
+def nu-module-dirs [] {
     let module_dirs = ($env | get -i $LIB_ENV | default '' | str trim)
     if ($module_dirs | is-empty) { return }
     $module_dirs
@@ -20,11 +20,11 @@ export def nu-module-dirs [] {
 }
 
 # Return include line (for nu -I) from NU_MODULE_DIRS
-export def nu-include-dirs [] {
+def nu-include-dirs [] {
     nu-module-dirs | str join (char -i 0x1e)
 }
 
 # Populate env NU_LIB_DIRS from NU_MODULE_DIRS
-export def --env setup-lib-dirs [] {
+def --env setup-lib-dirs [] {
     $env.NU_LIB_DIRS = ($env.NU_LIB_DIRS | append (nu-module-dirs))
 }

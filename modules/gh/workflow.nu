@@ -80,7 +80,7 @@ export def --env run [
     )
 
     if ($dispatch.error? | is-not-empty) {
-        log error $dispatch.error
+        log error ($dispatch.error | to text)
         return ( $result | insert "error" $dispatch.error )
     }
 

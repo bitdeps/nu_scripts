@@ -21,7 +21,7 @@ export def nu-module-dirs [] {
 
 # Return include line (for nu -I) from NU_MODULE_DIRS
 export def nu-include-dirs [] {
-    nu-module-dirs | str join (char nl)
+    nu-module-dirs | str join (char -i 0x1e)
 }
 
 # Populate env NU_LIB_DIRS from NU_MODULE_DIRS

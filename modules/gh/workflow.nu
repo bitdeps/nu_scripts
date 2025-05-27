@@ -14,8 +14,8 @@ export def --env list [
     log debug $'=> ($command_base) list --repo=($repo)'
     (api ...$args
         $'repos/($repo | default-repo)/actions/workflows'
-        | api-wrap
     )
+    | api-wrap
 }
 
 
@@ -118,13 +118,13 @@ export def --env "run get-dispatched" [
         }
     }
 
-    let interval = 3sec
-    let started_id = (do $latest_dispatch).id? | default 0
-    let started_at = date now
-
     # Preserve the branch's current sha
     let head_sha = branch get $ref --repo=$repo --args=$args
       | if ($in.error? | is-not-empty) { return $in } else { $in.commit.sha }
+
+    let interval = 3sec
+    let started_id = (do $latest_dispatch).id? | default 0
+    let started_at = date now
 
     # Run (dispatch) the workflow
     run $workflow --repo=$repo --ref=$ref --inputs=$inputs --args=$args
@@ -133,7 +133,7 @@ export def --env "run get-dispatched" [
     # Wait for a dispatched run to appear
     while ((date now) - $started_at) < $timeout {
         sleep $interval
-        do $latest_dispatch {head_sha: $head_sha}
+        (do $latest_dispatch {head_sha: $head_sha})
           | if ($in.id? | default 0) > $started_id {
                 log info $"Dispatched workflow ($in.name) run link ($in.html_url)"
                 return {run: $in}

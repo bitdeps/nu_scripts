@@ -13,8 +13,8 @@ export def --env list [
     log debug $'=> ($command_base) list --repo=($repo)'
     (api ...$args
         $'repos/($repo | default-repo)/branches'
-        | api-wrap
     )
+    | api-wrap
 }
 
 # Get a github branch

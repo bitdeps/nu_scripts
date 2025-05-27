@@ -9,10 +9,11 @@ const command_base = 'gh branch'
 export def --env list [
     --repo: string
     --args: list<string>=[]
-] {
+]: nothing -> any {
     log debug $'=> ($command_base) list --repo=($repo)'
     (api ...$args
         $'repos/($repo | default-repo)/branches'
+        | api-wrap
     )
 }
 

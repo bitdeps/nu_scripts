@@ -9,7 +9,7 @@ def 'get-env' [
     $env | get -i $key | default $default
 }
 
-# Split NU_MODULE_DIRS (; separated) helper variable 
+# Split NU_MODULE_DIRS (; separated) helper variable
 def nu-module-dirs [] {
     let module_dirs = ($env | get -i $LIB_ENV | default '' | str trim)
     if ($module_dirs | is-empty) { return }

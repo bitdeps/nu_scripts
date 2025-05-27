@@ -33,12 +33,12 @@ default:
   dispatch:
     workflow: test-pr.yaml
     inputs:
-      client-id: hello
+      client: hello
       feature: pr
     match:
       type: pull_request
       pull_request:
-        title_regex: '^ci\({{feature}} {{client-id}}\):'
+        title_regex: '^ci\({{feature}} {{client}}\):'
 
 dispatch:
   - repository: dennybaa/ghbar
@@ -82,13 +82,14 @@ steps:
       GITHUB_TOKEN: ${{ secrets.MYPAT }}
       NU_LOG_LEVEL: info
       NU_MODULE_DIRS: |
-        ${{ github.workspace }}/nu/modules
+        ${{ github.workspace }}/nu/modules;
         ${{ github.workspace }}/nu/scripts
     shell: nu {0}
     run: |
-      source ${{ github.workspace }}/nu/scripts/common/env.nu
-      cd code/
-      nu -I (nu-include-dirs) ./scripts/github/dispatch.nu
+      const workspace = '${{ github.workspace }}'
+      source $"($workspace)/nu/scripts/common/env.nu"
+      
+      cd code; nu -I (nu-include-dirs) $"($workspace)/nu/scripts/github/dispatch.nu"
 ```
 
 ## Key Environment Variables

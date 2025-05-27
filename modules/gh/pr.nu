@@ -8,7 +8,7 @@ const command_base = 'gh pr'
 # Useful filters:
 #   state - open, closed, all, default: open
 #   head - org:ref-name, eg: octocat:test-branch
-#   base - filter pulls by base branch name, 
+#   base - filter pulls by base branch name,
 #   For more filters see
 #       ref: https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests--parameters
 #
@@ -16,13 +16,13 @@ export def --env list [
     --repo: string                # repository, e.g. dennybaa/foobar
     --filter: record={}           # parameters to filter results
     --args: list<string>=[]
-] {
+]: nothing -> any {
     log debug $'=> ($command_base) list --repo=($repo)'
     let query = $filter | url build-query
     api ...$args (
         $'repos/($repo | default-repo)/pulls'
-          | if ($query | is-empty) { $in } else { $'($in)?($query)' }
-    )
+        | if ($query | is-empty) { $in } else { $'($in)?($query)' }
+    ) | api-wrap
 }
 
 # Get a github pull request by number

@@ -10,10 +10,11 @@ const command_base = 'gh workflow'
 export def --env list [
     --repo: string
     --args: list<string>=[]
-] {
+]: nothing -> any {
     log debug $'=> ($command_base) list --repo=($repo)'
     (api ...$args
         $'repos/($repo | default-repo)/actions/workflows'
+        | api-wrap
     )
 }
 
@@ -56,7 +57,7 @@ export def --env run [
 
         # find matching workflows by name or path
         let matched = $in.workflows
-          | find --columns=['name','path'] --regex=$workflow 
+          | find --columns=['name','path'] --regex=$workflow
 
         if ($matched | length) > 1 {
             log warning $"Multiple workflows found, the first will be only dispatched!"
@@ -97,7 +98,7 @@ export def --env run [
 # Returns workflow run record {run: record, error?: record}
 export def --env "run get-dispatched" [
     workflow: string        # lookup workflow by name or filename
-    --interval=5sec         # interval  
+    --interval=5sec         # interval
     --timeout = 15sec       # timeout
     --repo: string          # repository, e.g. dennybaa/foobar
     --ref: string = main    # ref/branch, e.g: v1.2.3
@@ -105,7 +106,7 @@ export def --env "run get-dispatched" [
     --args: list<any>=[]
 ] {
     log debug $'=> ($command_base) run get-dispatched ($workflow) --repo=($repo) --ref=($ref)'
-    let latest_dispatch = {|extra={}| 
+    let latest_dispatch = {|extra={}|
         # Selectively list appropriate runs
         run list $workflow --repo=$repo --args=$args --filter={
             branch: $ref
@@ -113,14 +114,14 @@ export def --env "run get-dispatched" [
             ...$extra
         }
         | if ($in.error? | is-not-empty) { return $in } else {
-            $in.workflow_runs.0? | default {}    
+            $in.workflow_runs.0? | default {}
         }
     }
 
     let interval = 3sec
     let started_id = (do $latest_dispatch).id? | default 0
     let started_at = date now
-    
+
     # Preserve the branch's current sha
     let head_sha = branch get $ref --repo=$repo --args=$args
       | if ($in.error? | is-not-empty) { return $in } else { $in.commit.sha }
@@ -164,7 +165,7 @@ export def --env "run get" [
 export def --env "run wait" [
     run_id: int               # workflow run id
     --repo : string           # repository, e.g. dennybaa/foobar
-    --interval=5sec           # interval  
+    --interval=5sec           # interval
     --timeout=60sec           # wait timeout
     --status=['completed']    # wait for specific status
 ] {

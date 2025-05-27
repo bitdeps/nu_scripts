@@ -1,9 +1,13 @@
 use std/log
 const command_base = 'gh core'
 
-def is_ci [] {
-    if ($env.GITHUB_ACTION? | is-not-empty) { return true } 
-    log debug $"=> ($command_base) command skips exection \(not running in Github Action)"
+def is_ci [message?: string] {
+    if ($env.GITHUB_ACTION? | is-not-empty) { return true }
+    if ($message != "") {
+        log debug $"=> ($command_base) ($message)"
+    } else {
+        log debug $"=> ($command_base) command skips exection \(not running in Github Action)"
+    }
     false
 }
 
@@ -12,7 +16,7 @@ def is_ci [] {
 export def --env "debug" [
     message: string     # A message
 ] {
-    if not (is_ci) { return }
+    if not (is_ci $"debug: ($message)") { return }
     print $"::debug::($message)"
 }
 
@@ -22,7 +26,7 @@ export def --env "notice" [
     message: string     # A message
     --params: record    # Record with parameters (file, line, endLine and title)
 ] {
-    if not (is_ci) { return }
+    if not (is_ci $"notice: ($message)") { return }
     mut sparams = ""
     if ($params | is-not-empty) {
         $params | transpose key value | each {|e| $"($e.key)=($e.value)"} | str join ','
@@ -37,7 +41,7 @@ export def --env "error" [
     message: string     # A message
     --params: record    # Record with parameters (file, line, endLine and title)
 ] {
-    if not (is_ci) { return }
+    if not (is_ci $"error: ($message)") { return }
     mut sparams = ""
     if ($params | is-not-empty) {
         $params | transpose key value | each {|e| $"($e.key)=($e.value)"} | str join ','
@@ -52,7 +56,7 @@ export def --env "warning" [
     message: string     # A message
     --params: record    # Record with parameters (file, line, endLine and title)
 ] {
-    if not (is_ci) { return }
+    if not (is_ci $"warning: ($message)") { return }
     mut sparams = ""
     if ($params | is-not-empty) {
         $params | transpose key value | each {|e| $"($e.key)=($e.value)"} | str join ','

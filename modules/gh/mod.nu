@@ -23,6 +23,18 @@ export def --env "default-repo" [] {
     )
 }
 
+# Wrap api response of kind list into items map
+#
+def api-wrap [] {
+    let $input = $in
+    try {
+        # we are kindof list/table
+        $input.0?; return {items: $input}
+    } catch {
+        return $input
+    }
+}
+
 # Invoke gh api command
 #
 # Wraps and passes arbitrary arguments to external gh api command.
@@ -32,12 +44,14 @@ export def --env --wrapped api [
     let cmd = ^gh api ...$args | complete
     if $cmd.exit_code != 0 {
         log error $'Run failed: gh api ($args | str join " ")'
-        $cmd.stdout | from json | if ($in | is-not-empty) {
-            return {error: $in}
-        } else {
-            return {error: {message: $cmd.stderr}}
+        # error
+        try {
+            let resp = $cmd.stdout | from json
+            if ($resp | is-not-empty) { return {error: $resp}}
+        } catch {
+            return {error: {message: ($cmd.stderr | default $cmd.stdout)}}
         }
     }
-    # response
+    # success
     try { $cmd.stdout | from json } catch { $cmd.stdout }
 }

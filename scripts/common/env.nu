@@ -12,7 +12,7 @@ def 'get-env' [
 # Split NU_MODULE_DIRS (; separated) helper variable
 def nu-module-dirs [] {
     let module_dirs = ($env | get -i $LIB_ENV | default '' | str trim)
-    if ($module_dirs | is-empty) { return }
+    if ($module_dirs | is-empty) { return [] }
     $module_dirs
       | split row ';'
       | each {|p| ($p | str trim | path expand) }

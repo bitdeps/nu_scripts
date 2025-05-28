@@ -3,7 +3,7 @@ const command_base = 'gh core'
 
 def is_ci [message?: string] {
     if ($env.GITHUB_ACTION? | is-not-empty) { return true }
-    if ($message != "") {
+    if ($message != null) {
         log debug $"=> ($command_base) ($message)"
     } else {
         log debug $"=> ($command_base) command skips exection \(not running in Github Action)"
@@ -86,7 +86,7 @@ export def getInput [
 #
 export def setOutput [
     name: string    # Output name
-    value: string   # Output value
+    value?: string  # Output value
 ] {
     if not (is_ci) { return }
     $"($name)=($value)" | save --append $env.GITHUB_OUTPUT
@@ -96,7 +96,7 @@ export def setOutput [
 #
 export def exportVariable [
     name: string    # Variable name
-    value: string   # Variable value
+    value?: string  # Variable value
 ] {
     if not (is_ci) { return }
     $"($name)=($value)" | save --append $env.GITHUB_ENV

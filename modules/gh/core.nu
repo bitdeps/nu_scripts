@@ -2,7 +2,7 @@ use std/log
 const command_base = 'gh core'
 
 def is_ci [message?: string] {
-    if ($env.GITHUB_ACTION? | is-not-empty) { return true }
+    if ($env.GITHUB_ACTION? == null) { return true }
     if ($message != null) {
         log debug $"=> ($command_base) ($message)"
     } else {

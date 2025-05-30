@@ -89,7 +89,7 @@ export def setOutput [
     value?: string  # Output value
 ] {
     if not (is_ci) { return }
-    $'($name)=($value)' | save --append $env.GITHUB_OUTPUT
+    $"($name)=($value)\n" | save --append $env.GITHUB_OUTPUT
 }
 
 # Github action core exportVariable
@@ -99,7 +99,7 @@ export def exportVariable [
     value?: string  # Variable value
 ] {
     if not (is_ci) { return }
-    $'($name)=($value)' | save --append $env.GITHUB_ENV
+    $"($name)=($value)\n" | save --append $env.GITHUB_ENV
 }
 
 # Github action core setSecret (masks secret )

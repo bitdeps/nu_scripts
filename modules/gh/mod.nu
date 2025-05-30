@@ -55,3 +55,28 @@ export def --env --wrapped api [
     # success
     try { $cmd.stdout | from json } catch { $cmd.stdout }
 }
+
+
+# Export github context helper
+export def context [] {
+    if ($env.GITHUB_ACTION? == null) {
+        log debug "gh context: not running in Github Actions!"
+        return {}
+    }
+    {
+        payload: (if ($env.GITHUB_EVENT_PATH? != null) { open $env.GITHUB_EVENT_PATH } else { {} })
+        eventName: $env.GITHUB_EVENT_NAME
+        sha: $env.GITHUB_SHA
+        ref: $env.GITHUB_REF
+        workflow: $env.GITHUB_WORKFLOW
+        action: $env.GITHUB_ACTION
+        actor: $env.GITHUB_ACTOR
+        job: $env.GITHUB_JOB
+        runAttempt: ($env.GITHUB_RUN_ATTEMPT | into int)
+        runNumber: ($env.GITHUB_RUN_NUMBER | into int)
+        runId: ($env.GITHUB_RUN_ID | into int)
+        apiUrl: ($env.GITHUB_API_URL? | default 'https://api.github.com')
+        serverUrl: ($env.GITHUB_SERVER_URL? | default 'https://github.com')
+        graphqlUrl: ($env.GITHUB_GRAPHQL_URL? | default 'https://api.github.com/graphql')
+    }
+}

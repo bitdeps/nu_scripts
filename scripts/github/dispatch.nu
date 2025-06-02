@@ -33,7 +33,7 @@ def dispatch [
       | if ($in | is-not-empty) {
             $in
         } else if ($fallback) {
-            log warning $"Falling back to ref: $($rule.match.fallback_ref), repo: ($rule.repository)"
+            log warning $"Falling back to ref: ($rule.match.fallback_ref), repo: ($rule.repository)"
             [{ref: $rule.match.fallback_ref}]
         } else { return }
 

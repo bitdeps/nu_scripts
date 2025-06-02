@@ -43,6 +43,9 @@ default:
 dispatch:
   - repository: dennybaa/ghbar
   - repository: dennybaa/ghfoo
+  - repository: dennybaa/testing
+    match:
+      fallback_ref: main
 ```
 
 ## Operation Flow

@@ -12,8 +12,7 @@ def is_ci [message?: string] {
 }
 
 # Github action core debug command
-#
-export def --env "debug" [
+export def debug [
     message: string     # A message
 ] {
     if not (is_ci $"debug: ($message)") { return }
@@ -21,8 +20,7 @@ export def --env "debug" [
 }
 
 # Github action core notice command
-#
-export def --env "notice" [
+export def notice [
     message: string     # A message
     --params: record    # Record with parameters (file, line, endLine and title)
 ] {
@@ -35,9 +33,11 @@ export def --env "notice" [
     print $"::notice ($sparams)::($message)"
 }
 
+# Alias to notice command
+export alias info = notice
+
 # Github action core error command
-#
-export def --env "error" [
+export def error [
     message: string     # A message
     --params: record    # Record with parameters (file, line, endLine and title)
 ] {
@@ -51,8 +51,7 @@ export def --env "error" [
 }
 
 # Github action core setFailed (error + exit 1)
-#
-export def --env setFailed [
+export def setFailed [
     message: string     # A message
     --params: record    # Record with parameters (file, line, endLine and title)
 ] {
@@ -61,8 +60,7 @@ export def --env setFailed [
 }
 
 # Github action core warning command
-#
-export def --env "warning" [
+export def warning [
     message: string     # A message
     --params: record    # Record with parameters (file, line, endLine and title)
 ] {
@@ -76,14 +74,12 @@ export def --env "warning" [
 }
 
 # Github action core isDebug
-#
 export def isDebug [] {
     if not (is_ci) { return }
     ($env.RUNNER_DEBUG? | default "false") == "true"
 }
 
 # Github action core getInput
-#
 export def getInput [
     name: string    # Input name
 ] {
@@ -93,7 +89,6 @@ export def getInput [
 }
 
 # Github action core setOutput
-#
 export def setOutput [
     name: string    # Output name
     value?: string  # Output value
@@ -103,7 +98,6 @@ export def setOutput [
 }
 
 # Github action core exportVariable
-#
 export def exportVariable [
     name: string    # Variable name
     value?: string  # Variable value
@@ -113,7 +107,6 @@ export def exportVariable [
 }
 
 # Github action core setSecret (masks secret )
-#
 export def setSecret [
     secret: string      # Secret value
 ] {

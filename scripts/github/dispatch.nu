@@ -29,8 +29,12 @@ def dispatch [
 ] {
     log debug $"=> dispatch repository: ($rule.repository), workflow: ($rule.workflow)"
     let branches = (match-branches $rule).branches
+      | if ($in | not-empty) {
+            $in
+        } else if ($rule.match?.fallback_ref? != null) {
+            [{ref: $rule.match.fallback_ref}]
+        } else { return }
 
-    if ($branches | is-empty) { return }
     if ($branches | length) > 1 {
         log warning $"Dispatch multiple branches ($branches | get ref)"
     }

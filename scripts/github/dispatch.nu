@@ -28,10 +28,11 @@ def dispatch [
     rule: record    # workflow dispatch rule
 ] {
     log debug $"=> dispatch repository: ($rule.repository), workflow: ($rule.workflow)"
+    let fallback = ($rule.match?.fallback_ref? != null)
     let branches = (match-branches $rule).branches
       | if ($in | is-not-empty) {
             $in
-        } else if ($rule.match?.fallback_ref? != null) {
+        } else if ($fallback) {
             [{ref: $rule.match.fallback_ref}]
         } else { return }
 
@@ -46,9 +47,11 @@ def dispatch [
         if ($dispatched.error? != null) { api-error $dispatched.error --repo=$rule.repository --fail }
 
         # We can check if dispatch happend on the correct sha
-        $branch.sha? | if ($in != null) { $in } | if ($in != $dispatched.run.head_sha) {
+        $branch.sha?
+          | if ($in != null) { $in }
+          | if (not $fallback) and ($in != $dispatched.run.head_sha) {
             gh core warning $"Dispatched workflow ($rule.workflow) commit sha missmatch!"
-        }
+          }
     }
 }
 

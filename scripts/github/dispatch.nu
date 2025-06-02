@@ -29,7 +29,7 @@ def dispatch [
 ] {
     log debug $"=> dispatch repository: ($rule.repository), workflow: ($rule.workflow)"
     let branches = (match-branches $rule).branches
-      | if ($in | not-empty) {
+      | if ($in | is-not-empty) {
             $in
         } else if ($rule.match?.fallback_ref? != null) {
             [{ref: $rule.match.fallback_ref}]

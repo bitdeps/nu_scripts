@@ -50,6 +50,16 @@ export def --env "error" [
     print $"::error ($sparams)::($message)"
 }
 
+# Github action core setFailed (error + exit 1)
+#
+export def --env setFailed [
+    message: string     # A message
+    --params: record    # Record with parameters (file, line, endLine and title)
+] {
+    error $message --params=$params
+    exit 1
+}
+
 # Github action core warning command
 #
 export def --env "warning" [

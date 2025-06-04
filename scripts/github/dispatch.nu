@@ -82,7 +82,7 @@ def match-pull-requests [rule: record] {
         let pattern = $in
         let input_keys = $in | parse -r $placeholder_regex | get key
         for i in $input_keys {
-            if ($i not in $inputs) {
+            if not ($i in $inputs) {
                 log error $"Value for '($i)' not found"
                 log error $'=> input_keys=($input_keys)'; exit 1;
             }

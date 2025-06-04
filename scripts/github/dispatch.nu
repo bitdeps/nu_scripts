@@ -81,7 +81,12 @@ def match-pull-requests [rule: record] {
         # First pick the {{key}} strings inside regex (e.g. {{ foo }}, {{bar}})
         let pattern = $in
         let input_keys = $in | parse -r $placeholder_regex | get key
-        log debug $'input_keys=($input_keys)'
+        for i in $input_keys {
+            if ($i not in $inputs) {
+                log error $"Value for '($i)' not found"
+                log error $'=> input_keys=($input_keys)'; exit 1;
+            }
+        }
 
         # Replace all the matched keys with the value from $inputs to for the actuall regex
         $input_keys | reduce --fold $pattern {|it, acc|

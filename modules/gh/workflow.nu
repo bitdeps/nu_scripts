@@ -7,7 +7,7 @@ const command_base = 'gh workflow'
 # List github workflows
 #
 # Returns the list of workflows.
-export def --env list [
+export def list [
     --repo: string
     --args: list<string>=[]
 ]: nothing -> any {
@@ -23,7 +23,7 @@ export def --env list [
 #
 # Parameters can specified with --filter to narrow down the result list, such as
 # for example: actor, branch, check_suite_id, created, event, head_sha, status.
-export def --env "run list" [
+export def "run list" [
     workflow                      # workflow id or filename (e.g. test.yaml)
     --repo: string                # repository, e.g. dennybaa/foobar
     --filter: record={}           # parameters to filter results
@@ -44,7 +44,7 @@ export def --env "run list" [
 # Note: workflow file must have on.workflow_dispatch!
 #
 # Returns workflow record {workflow: record, error?: record}
-export def --env run [
+export def run [
     workflow: string        # lookup workflow by name or filename
     --repo: string          # repository, e.g. dennybaa/foobar
     --ref: string = main    # ref/branch, e.g: v1.2.3
@@ -52,23 +52,24 @@ export def --env run [
     --args: list<any>=[]
 ] {
     log debug $'=> ($command_base) run ($workflow) --repo=($repo) --ref=($ref)'
-    let found = list --args=$args --repo=$repo | do {
-        if ($in.error? | is-not-empty) { return $in } # exit if error
 
-        # find matching workflows by name or path
-        let matched = $in.workflows
-          | find --columns=['name','path'] --regex=$workflow
+    let found = list --args=$args --repo=$repo
+      | if ($in.error? != null) {
+            return $in
+        } else { $in }
 
-        if ($matched | length) > 1 {
-            log warning $"Multiple workflows found, the first will be only dispatched!"
-        } else if ($matched | length) == 0 {
+    let matched = $found.workflows
+      | find --columns=['name','path'] --regex=$workflow
+      | if ($in | length) == 0 {
             let err = $"No workflow found matching /($workflow)/!"
             log error $err; return {error: {message: $err}}
+        } else { $in }
+      | if ($in | length) > 1 {
+            log warning $"Multiple workflows found, the first will be only dispatched!"
+            $in
         }
-        $matched.0
-    }
 
-    let result = { workflow: $found }
+    let result = { workflow: $matched.0 }
     let body = {
         ref: ($ref | default 'main')
         inputs: ($inputs | default {})
@@ -76,7 +77,7 @@ export def --env run [
 
     let dispatch = $body | to json | (api
         --method 'POST'
-        $'repos/($repo | default-repo)/actions/workflows/($found.id)/dispatches'
+        $'repos/($repo | default-repo)/actions/workflows/($matched.0.id)/dispatches'
         --input '-'
     )
 

@@ -69,6 +69,7 @@ def match-branches [rule: record] {
 # Match refs of pull requests
 #
 def match-pull-requests [rule: record] {
+    log debug $"=> match-pull-requests"
     let match = $rule.match.pull_request
     let pulls = gh pr list --repo=$rule.repository
     let inputs = $rule.inputs | default {}
@@ -80,9 +81,7 @@ def match-pull-requests [rule: record] {
         # First pick the {{key}} strings inside regex (e.g. {{ foo }}, {{bar}})
         let pattern = $in
         let input_keys = $in | parse -r $placeholder_regex | get key
-
-        print '-------------------'
-        print $input_keys
+        log debug $'input_keys=($input_keys)'
 
         # Replace all the matched keys with the value from $inputs to for the actuall regex
         $input_keys | reduce --fold $pattern {|it, acc|

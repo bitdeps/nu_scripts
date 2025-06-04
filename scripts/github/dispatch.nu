@@ -84,7 +84,7 @@ def match-pull-requests [rule: record] {
         for i in $input_keys {
             if not ($i in $inputs) {
                 log error $"Value for '($i)' not found in inputs"
-                log error $'=> keys=($inputs | items {|k| $k})'; exit 1;
+                log error $'=> ($inputs | items {|k| $k})'; exit 1;
             }
         }
 

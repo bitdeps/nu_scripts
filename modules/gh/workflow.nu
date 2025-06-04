@@ -67,7 +67,7 @@ export def run [
       | if ($in | length) > 1 {
             log warning $"Multiple workflows found, the first will be only dispatched!"
             $in
-        }
+        } else { $in }
 
     let result = { workflow: $matched.0 }
     let body = {
@@ -86,7 +86,7 @@ export def run [
         return ( $result | insert "error" $dispatch.error )
     }
 
-    log info $"Dispatched workflow ($found.name) in repository ($repo | default-repo)"
+    log info $"Dispatched workflow ($matched.0.name) in repository ($repo | default-repo)"
     return $result
 }
 

@@ -83,8 +83,8 @@ def match-pull-requests [rule: record] {
         let input_keys = $in | parse -r $placeholder_regex | get key
         for i in $input_keys {
             if not ($i in $inputs) {
-                log error $"Value for '($i)' not found"
-                log error $'=> input_keys=($input_keys)'; exit 1;
+                log error $"Value for '($i)' not found in inputs"
+                log error $'=> keys=($inputs | items {|k| $k})'; exit 1;
             }
         }
 

@@ -81,6 +81,9 @@ def match-pull-requests [rule: record] {
         let pattern = $in
         let input_keys = $in | parse -r $placeholder_regex | get key
 
+        print '-------------------'
+        print $input_keys
+
         # Replace all the matched keys with the value from $inputs to for the actuall regex
         $input_keys | reduce --fold $pattern {|it, acc|
             $acc | str replace -r $placeholder_regex ($inputs | get $it)

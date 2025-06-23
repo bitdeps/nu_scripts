@@ -16,7 +16,7 @@ def nu-module-dirs [] {
     $module_dirs
       | split row ';'
       | each {|p| ($p | str trim | path expand) }
-      | filter {|p| ($p | path exists) }
+      | where {|p| ($p | path exists) }
 }
 
 # Return include line (for nu -I) from NU_MODULE_DIRS

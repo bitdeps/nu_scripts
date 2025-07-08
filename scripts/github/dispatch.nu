@@ -1,9 +1,9 @@
 use std/log
 use gh
-source common/git.nu
-source common/env.nu
+source ../common/git.nu
+source ../common/env.nu
 
-let placeholder_regex = '{{\s*(?<key>[^\s]+)\s*}}'
+let placeholder_regex = '{\s*(?<key>[^\s]+)\s*}'
 
 
 def api-error [error: any, --repo: string, --fail] {
@@ -11,6 +11,32 @@ def api-error [error: any, --repo: string, --fail] {
     if ($fail) { exit 1 }
 }
 
+def dig [record: record, path: string] {
+    $path | split row '.' | reduce -f $record {|field, acc| $acc | get $field}
+}
+
+# Parses inputs record if it contains parameters (values from data)
+#   eg: {prNumber: 'aa-{pull_request.number}-xx'} will replace to actual value
+#
+def get-inputs [
+    inputs: record  # inputs record with possible parametrized values
+    data: record    # data to get value from, eg: {ref: 'asddasda', pull_request: {...}}
+] {
+    # Builds up parameters (path to value) map
+    let params = $inputs
+      | items {|_, value| $value | parse -r $placeholder_regex | get key}
+      | flatten | reduce -f {} {|path, acc| $acc | merge {$path: (dig $data $path)} }
+
+    $inputs | columns | reduce -f {} {|col, result|
+        # If value contains parameters regex replace each paramter one by one
+        let value = $inputs | get $col
+        let keys = ($value | parse -r $placeholder_regex) | get key
+        let replaced = $keys | reduce -f $value {|key, acc|
+            $acc | str replace -r $placeholder_regex ($params | get $key | into string)
+        }
+        $result | insert $col $replaced
+    }
+}
 
 # Dispatch workflow matching a rule
 #
@@ -22,14 +48,16 @@ def api-error [error: any, --repo: string, --fail] {
 #   match:
 #     type: pull_request
 #     pull_request:
-#       title_regex: '^ci\({{featue}} {{client-id}}\):'
+#       title_regex: '^ci\({featue} {client-id}\):'
 #
 def dispatch [
     rule: record    # workflow dispatch rule
 ] {
     log debug $"=> dispatch repository: ($rule.repository), workflow: ($rule.workflow)"
     let fallback = ($rule.match?.fallback_ref? != null)
-    let branches = (match-branches $rule).branches
+
+    # items is a list of {ref: xxxx, pull_request: {...}} (actually the data depends on type)
+    let items = (match-refs $rule).items
       | if ($in | is-not-empty) {
             $in
         } else if ($fallback) {
@@ -37,29 +65,31 @@ def dispatch [
             [{ref: $rule.match.fallback_ref}]
         } else { return }
 
-    if ($branches | length) > 1 {
-        log warning $"Dispatch multiple branches ($branches | get ref)"
+    if ($items | length) > 1 {
+        log warning $"Dispatch multiple refs ($items | get ref)"
     }
 
-    for branch in $branches {
+    for data in $items {
+        let inputs = get-inputs $rule.inputs $data
         let dispatched = (gh workflow run get-dispatched $rule.workflow
-            --repo=$rule.repository --inputs=$rule.inputs --ref=$branch.ref
+            --repo=$rule.repository --inputs=$inputs --ref=$data.ref
         )
         if ($dispatched.error? != null) { api-error $dispatched.error --repo=$rule.repository --fail }
 
         # We can check if dispatch happend on the correct sha
-        $branch.sha?
-          | if ($in != null) { $in }
-          | if (not $fallback) and ($in != $dispatched.run.head_sha) {
-            gh core warning $"Dispatched workflow ($rule.workflow) commit sha missmatch!"
-          }
+        $data.sha?
+          | if ($in != null) {
+                if (not $fallback) and ($in != $dispatched.run.head_sha) {
+                gh core error $"Dispatched workflow ($rule.workflow) commit sha missmatch (expected: $in)!"
+                }
+            }
     }
 }
 
 
 # Invoke branch matcher depending on match.type
 #
-def match-branches [rule: record] {
+def match-refs [rule: record] {
     match ($rule.match?.type?) {
         pull_request => { match-pull-requests $rule }
         _ => { gh core error $"Unknown match.type: '($rule.match?.type?)'"; exit 1; }
@@ -70,17 +100,16 @@ def match-branches [rule: record] {
 #
 def match-pull-requests [rule: record] {
     log debug $"=> match-pull-requests"
+    const empty = {items: []}
     let match = $rule.match.pull_request
     let pulls = gh pr list --repo=$rule.repository
     let inputs = $rule.inputs | default {}
     if ($pulls.error? != null) { api-error $pulls.error --repo=$rule.repository --fail }
 
-    # Match pull requests using title_regex
-    $match.title_regex?
-    | if ($in != null) {
-        # First pick the {{key}} strings inside regex (e.g. {{ foo }}, {{bar}})
-        let pattern = $in
-        let input_keys = $in | parse -r $placeholder_regex | get key
+    ## Match Pull Requests using title_regex
+    if ($match.title_regex? != null) {
+        # Detect parameters (a {key}) inside regex (e.g. { foo }, {bar})
+        let input_keys = $match.title_regex | parse -r $placeholder_regex | get key
         for i in $input_keys {
             if not ($i in $inputs) {
                 log error $"Value for '($i)' not found in inputs"
@@ -88,21 +117,32 @@ def match-pull-requests [rule: record] {
             }
         }
 
-        # Replace all the matched keys with the value from $inputs to for the actuall regex
-        $input_keys | reduce --fold $pattern {|it, acc|
-            $acc | str replace -r $placeholder_regex ($inputs | get $it)
-        }
-    }
-    | do {
-        let regex = $in; let found = $pulls.items | where title =~ $regex
-        if ($found | is-empty) {
+        # Substitute found paramters with valus from $inputs to build up the actual regex
+        let regex = $input_keys
+          | reduce --fold $match.title_regex {|it, acc|
+                $acc | str replace -r $placeholder_regex ($inputs | get $it)
+            }
+
+        # Find PRs list matching the regex
+        if ($regex != null) {
+            $pulls.items | where title =~ $regex
+              | if ($in | is-not-empty) {
+                    return {
+                        # return items list records
+                        items: ($in | each {|e|
+                            {
+                                sha: $e.head.sha,
+                                ref: $e.head.ref,
+                                pull_request: $e
+                            }
+                        })
+                    }
+                }
             log warning $"No pull requests matched title regex /($regex)/, repo: ($rule.repository)"
         }
-        $found
     }
-    | if ($in | is-not-empty) { return {branches: $in.head} }
 
-    return {branches: []}
+    return $empty
 }
 
 # Dispatch workflows from .dispatch.yaml

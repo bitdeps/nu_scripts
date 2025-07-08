@@ -38,12 +38,14 @@ default:
     match:
       type: pull_request
       pull_request:
-        title_regex: '^ci\({{feature}} {{client}}\):'
+        title_regex: '^ci\({feature} {client}\):'
 
 dispatch:
   - repository: dennybaa/ghbar
   - repository: dennybaa/ghfoo
   - repository: dennybaa/testing
+    inputs:
+      pr-number: '{pull_request.number}' # additional input (take data from a matched pull_request)
     match:
       fallback_ref: main
 ```
@@ -55,8 +57,8 @@ dispatch:
      `default.dispatch` < `dispatch[N]` < `--inputs`
 
 2. **Rule Processing**  
-   - Substitutes `{{input}}` placeholders in match rules
    - Executes matcher based on `match.type`
+   - Substitutes inputs from parameters (`{parameter}`) used in rules such as `pull_request.title_regex`
 
 3. **Workflow Dispatch**  
    - Triggers workflow for each matched ref (branch/tag)
@@ -86,7 +88,6 @@ steps:
       NU_LOG_LEVEL: info
       NU_MODULE_DIRS: |
         ${{ github.workspace }}/nu/modules;
-        ${{ github.workspace }}/nu/scripts
     shell: nu {0}
     run: |
       const workspace = '${{ github.workspace }}'
@@ -103,6 +104,6 @@ steps:
 ---
 
 # Pattern Matching
-- Uses `{{key}}` placeholders in regex patterns
+- Uses `{parameter}` placeholders in regex patterns
 - Automatically substitutes values from `inputs`
-- Example: `'^ci\({{feature}} {{client-id}}\):'` becomes `'^ci\(pr hello\):'`
+- Example: `'^ci\({feature} {client-id}\):'` becomes `'^ci\(pr hello\):'`

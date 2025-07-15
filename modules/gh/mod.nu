@@ -7,6 +7,7 @@ export-env {
 
 export module ./core.nu
 export module ./branch.nu
+export module ./label.nu
 export module ./pr.nu
 export module ./workflow.nu
 
@@ -35,6 +36,18 @@ def api-wrap [] {
     }
 }
 
+# Compact record
+def "compact record" [record?: record] {
+    $in
+      | default $record
+      | transpose k v
+      | reduce -f {} {|e, acc|
+            if ($e.v | is-not-empty) {
+                $acc | insert $e.k $e.v
+            } else { $acc }
+        }
+}
+
 # Invoke gh api command
 #
 # Wraps and passes arbitrary arguments to external gh api command.
@@ -47,7 +60,7 @@ export def --env --wrapped api [
         # error
         try {
             let resp = $cmd.stdout | from json
-            if ($resp | is-not-empty) { return {error: $resp}}
+            if ($resp | is-not-empty) { return {error: $resp} }
         } catch {
             return {error: {message: ($cmd.stderr | default $cmd.stdout)}}
         }

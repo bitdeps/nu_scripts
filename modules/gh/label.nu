@@ -78,6 +78,31 @@ export def --env "issue-remove" [
       }
 }
 
+# List labels for a repository
+#
+# Lists all labels for a repository.
+export def --env list [
+    --repo: string                  # repository, e.g. dennybaa/foobar
+    --args: list<string>=[]
+] {
+    log debug $'=> ($command_base) list --repo=($repo)'
+    api ...$args $'repos/($repo | default-repo)/labels'
+      | api-wrap
+}
+
+# Get a label
+#
+# Gets a label using the given name.
+export def --env get [
+    name: string                    # Name of the label to get (required)
+    --repo: string                  # repository, e.g. dennybaa/foobar
+    --args: list<string>=[]
+] {
+
+    log debug $'=> ($command_base) get --repo=($repo)'
+    api ...$args $'repos/($repo | default-repo)/labels/($name)'
+}
+
 # Create a label
 #
 # Creates a label for the specified repository with the given name and color. The name and color parameters are required. The color must be a valid hexadecimal color code.

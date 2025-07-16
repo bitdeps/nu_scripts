@@ -17,23 +17,20 @@ export module ./workflow.nu
 # If empty path is provided return the current {owner}/{repo}.
 export def --env "default-repo" [] {
     $in | default (
-        $in | if ($in | is-empty) {
-            log warning 'Missing --repo=..., invocation outside git tree will fail!'
-        };
-        '{owner}/{repo}'
+        if ($in | is-empty) and ('.git' | path exists) == false {
+            log error 'Use --repo=my-org/repo, outside of a git tree!'; exit 1
+        }; '{owner}/{repo}'
     )
 }
 
-# Wrap api response of kind list into items map
+# Wrap api response into a record with items list
 #
 def api-wrap [] {
     let $input = $in
-    try {
-        # we are kindof list/table
-        $input.0?; return {items: $input}
-    } catch {
-        return $input
-    }
+    let $tinfo = $input | describe
+    if ([table< list<] | any {|type| $tinfo | str starts-with $type}) { return {items: $input} }
+    # return response as-is
+    return $input
 }
 
 # Compact record
@@ -56,13 +53,15 @@ export def --env --wrapped api [
 ] {
     let cmd = ^gh api ...$args | complete
     if $cmd.exit_code != 0 {
+        let msg = $cmd.stderr | default $cmd.stdout
         log error $'Run failed: gh api ($args | str join " ")'
+        log error $msg
         # error
         try {
-            let resp = $cmd.stdout | from json
+            let resp = $msg | from json
             if ($resp | is-not-empty) { return {error: $resp} }
         } catch {
-            return {error: {message: ($cmd.stderr | default $cmd.stdout)}}
+            return {error: {message: $msg}}
         }
     }
     # success
@@ -84,6 +83,7 @@ export def context [] {
         workflow: $env.GITHUB_WORKFLOW
         action: $env.GITHUB_ACTION
         actor: $env.GITHUB_ACTOR
+        repository: $env.GITHUB_REPOSITORY
         job: $env.GITHUB_JOB
         runAttempt: ($env.GITHUB_RUN_ATTEMPT | into int)
         runNumber: ($env.GITHUB_RUN_NUMBER | into int)

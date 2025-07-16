@@ -86,8 +86,7 @@ export def --env list [
     --args: list<string>=[]
 ] {
     log debug $'=> ($command_base) list --repo=($repo)'
-    api ...$args $'repos/($repo | default-repo)/labels'
-      | api-wrap
+    api ...$args $'repos/($repo | default-repo)/labels' | api-wrap
 }
 
 # Get a label
